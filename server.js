@@ -11,7 +11,8 @@ const {
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+// Define a schema for the public key
+const PublicKeySchema = new mongoose.Schema({ key: String });
 // Connect to your MongoDB database
 const dbURI = 'mongodb+srv://favour:passwordd@cluster0.pebhzxv.mongodb.net/channel'
 // mongoose.connect('mongodb+srv://favour:passwordd@cluster0.pebhzxv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',);
@@ -19,9 +20,6 @@ const dbURI = 'mongodb+srv://favour:passwordd@cluster0.pebhzxv.mongodb.net/chann
 
 app.post('/store-key', async (req, res) => {
   const { publicKey, channelName } = req.body;
-
-  // Define a schema for the public key
-  const PublicKeySchema = new mongoose.Schema({ key: String });
 
   // Create a model from the schema with the channel name
   const PublicKey = mongoose.model(channelName, PublicKeySchema);
@@ -51,9 +49,6 @@ app.post('/store-key', async (req, res) => {
 app.delete('/delete-key', async (req, res) => {
     const { publicKey, channelName } = req.body;
     
-  
-    // Define a schema for the public key
-    const PublicKeySchema = new mongoose.Schema({ key: String });
   
     // Get the model for the channel
     const PublicKey = mongoose.model(channelName, PublicKeySchema);
@@ -119,8 +114,7 @@ app.post('/generate-token', async (req, res) => {
   const channelName = req.body.channelName;
   const token = generateRtcToken(channelName);
 
-  // Define a schema for the public key
-  const PublicKeySchema = new mongoose.Schema({ key: String });
+  
 
   // Create a model from the schema with the channel name
   const PublicKey = mongoose.model(channelName, PublicKeySchema);
