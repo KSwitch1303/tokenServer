@@ -18,24 +18,33 @@ const dbURI = 'mongodb+srv://favour:passwordd@cluster0.pebhzxv.mongodb.net/chann
 
 
 app.post('/store-key', async (req, res) => {
-    const { publicKey, channelName } = req.body;
-  
-    // Define a schema for the public key
-    const PublicKeySchema = new mongoose.Schema({ key: String });
-  
-    // Create a model from the schema with the channel name
-    const PublicKey = mongoose.model(channelName, PublicKeySchema); 
-  
-    // Create a new document from the PublicKey model
+  const { publicKey, channelName } = req.body;
+
+  // Define a schema for the public key
+  const PublicKeySchema = new mongoose.Schema({ key: String });
+
+  // Create a model from the schema with the channel name
+  const PublicKey = mongoose.model(channelName, PublicKeySchema);
+
+  // Check if a document with the given public key already exists
+  const existingKey = await PublicKey.findOne({ key: publicKey });
+
+  if (existingKey) {
+    // If the public key already exists, send a response back to the client
+    res.send({ message: 'Public key already exists!' });
+    console.log('Public key already exists!');
+  } else {
+    // If the public key doesn't exist, create a new document
     const key = new PublicKey({ key: publicKey });
-  
-    // Save the document to the database
+
+    // Save the new document to the database
     await key.save();
-    
+
     // Send a response back to the client
     res.send({ message: 'Public key stored successfully!' });
     console.log('Public key stored successfully!');
-  });
+  }
+});
 
 
 //delete endpoints
