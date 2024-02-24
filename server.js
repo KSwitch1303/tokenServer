@@ -101,6 +101,20 @@ const generateRtcToken = (channelName) => {
   return tokenA; // or return tokenB if you want to use the token generated with user account
 };
 
+//chck if the channel already exists
+app.get('/collection-exists', async (req, res) => {
+  const { channelName } = req.query;
+
+  // Check if a collection with the given name exists
+  const collectionNames = await mongoose.connection.db.listCollections().toArray();
+  const collectionExists = collectionNames.some(collection => collection.name === channelName);
+
+  // Send a response back to the client
+  res.send({ collectionExists });
+});
+
+
+// generate the token
 app.post('/generate-token', (req, res) => {
   const channelName = req.body.channelName;
   const token = generateRtcToken(channelName);
