@@ -115,11 +115,30 @@ app.get('/collection-exists', async (req, res) => {
 
 
 // generate the token
-app.post('/generate-token', (req, res) => {
+app.post('/generate-token', async (req, res) => {
   const channelName = req.body.channelName;
   const token = generateRtcToken(channelName);
+
+  // Define a schema for the public key
+  const PublicKeySchema = new mongoose.Schema({ key: String });
+
+  // Create a model from the schema with the channel name
+  const PublicKey = mongoose.model(channelName, PublicKeySchema);
+
+  // Create a dummy document in the collection
+  const dummy = new PublicKey({ key: 'dummy' });
+  await dummy.save();
+
+  // Immediately delete the dummy document
+  await PublicKey.deleteOne({ key: 'dummy' });
+
   res.json({ token });
 });
+// app.post('/generate-token', (req, res) => {
+//   const channelName = req.body.channelName;
+//   const token = generateRtcToken(channelName);
+//   res.json({ token });
+// });
 
 mongoose.connect(dbURI)
     .then((result)=> {
