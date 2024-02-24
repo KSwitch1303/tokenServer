@@ -107,7 +107,7 @@ app.get('/collection-exists', async (req, res) => {
 
   // Check if a collection with the given name exists
   const collectionNames = await mongoose.connection.db.listCollections().toArray();
-  const collectionExists = collectionNames.some(collection => collection.name === channelName);
+  const collectionExists = collectionNames.some(collection => collection.name === `${channelName.toLowerCase()}s`);
 
   // Send a response back to the client
   res.send({ collectionExists });
