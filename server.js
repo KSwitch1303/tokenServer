@@ -16,8 +16,6 @@ app.use(cors());
 app.use(express.json());
 // Define a schema for the public key
 const PublicKeySchema = new mongoose.Schema({ key: String });
-// Connect to your MongoDB database
-// mongoose.connect('mongodb+srv://favour:passwordd@cluster0.pebhzxv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',);
 
 
 app.post('/store-key', async (req, res) => {
@@ -64,10 +62,10 @@ app.delete('/delete-key', async (req, res) => {
   });
 
 const generateRtcToken = (channelName) => {
-  const appId = "69c3c885e2ef4de5995793276cf21683";
-  const appCertificate = "19f2af98d0994da3b887d3083c673e09";
+  const appId = process.env.appID;
+  const appCertificate = process.env.appCERT;
   const uid = 0;
-  const userAccount = "test_user_id";
+  const userAccount = "host";
   const role = RtcRole.PUBLISHER;
 
   const expirationTimeInSeconds = 3600;
