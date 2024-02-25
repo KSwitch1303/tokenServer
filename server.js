@@ -24,14 +24,14 @@ sdk.server(process.env.sdkSRV);
 app.post('/mint', async (req, res) => {
   // const {  } = req.body;
   const { name, symbol, image, description,channelName } = req.body;
-  const PublicKey = mongoose.model(channelName, PublicKeySchema);
+  const PublicKey = mongoose.model(`${channelName.toLowerCase()}s`, PublicKeySchema);
   console.log(req.body);
   // Fetch the public keys from the database
   const key = await PublicKey.find({});
 
   // Extract the public keys into an array
   const arr = key.map(doc => doc.key);
-  console.log(arr[0]);
+  console.log(arr);
   for (let i = 0; i < arr.length; i++) {
     await sdk
       .postV2ProjectsProjectidNfts(
