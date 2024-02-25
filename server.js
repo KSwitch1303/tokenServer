@@ -1,3 +1,6 @@
+require('dotenv').config();
+
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -14,7 +17,6 @@ app.use(express.json());
 // Define a schema for the public key
 const PublicKeySchema = new mongoose.Schema({ key: String });
 // Connect to your MongoDB database
-const dbURI = 'mongodb+srv://favour:passwordd@cluster0.pebhzxv.mongodb.net/channel'
 // mongoose.connect('mongodb+srv://favour:passwordd@cluster0.pebhzxv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',);
 
 
@@ -114,8 +116,6 @@ app.post('/generate-token', async (req, res) => {
   const channelName = req.body.channelName;
   const token = generateRtcToken(channelName);
 
-  
-
   // Create a model from the schema with the channel name
   const PublicKey = mongoose.model(channelName, PublicKeySchema);
 
@@ -128,13 +128,8 @@ app.post('/generate-token', async (req, res) => {
 
   res.json({ token });
 });
-// app.post('/generate-token', (req, res) => {
-//   const channelName = req.body.channelName;
-//   const token = generateRtcToken(channelName);
-//   res.json({ token });
-// });
 
-mongoose.connect(dbURI)
+mongoose.connect(process.env.DB_URI)
     .then((result)=> {
         app.listen(5000, () => console.log('Server started on port 5000'));
     })
