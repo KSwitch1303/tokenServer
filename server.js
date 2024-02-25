@@ -1,8 +1,8 @@
 require('dotenv').config();
 
-
 const express = require('express');
 const cors = require('cors');
+const sdk = require("api")("@underdog/v2.0#1bkcoi35lscke5fs");
 const mongoose = require('mongoose');
 const {
   RtcTokenBuilder,
@@ -17,12 +17,45 @@ app.use(express.json());
 // Define a schema for the public key
 const PublicKeySchema = new mongoose.Schema({ key: String });
 
+sdk.auth(process.env.sdkAUTH);
+sdk.server(process.env.sdkSRV);
+
+// mint
+app.post('/mint', async (req, res) => {
+  // const {  } = req.body;
+  const { name, symbol, image, description,channelName } = req.body;
+  const PublicKey = mongoose.model(channelName, PublicKeySchema);
+  console.log(req.body);
+  // Fetch the public keys from the database
+  const key = await PublicKey.find({});
+
+  // Extract the public keys into an array
+  const arr = key.map(doc => doc.key);
+  console.log(arr[0]);
+  for (let i = 0; i < arr.length; i++) {
+    await sdk
+      .postV2ProjectsProjectidNfts(
+        {
+          receiverAddress: arr[i],
+          name,
+          symbol,
+          description,
+          image,
+        },
+        { projectId: 2 },
+      )
+      .then(({ data }) => console.log(data))
+      .catch((err) => console.error(err));
+  }
+
+  res.send({ message: 'Done' });
+});
 
 app.post('/store-key', async (req, res) => {
   const { publicKey, channelName } = req.body;
 
   // Create a model from the schema with the channel name
-  const PublicKey = mongoose.model(channelName, PublicKeySchema);
+  const PublicKey = mongoose.model(`${channelName.toLowerCase()}s`, PublicKeySchema);
 
   // Check if a document with the given public key already exists
   const existingKey = await PublicKey.findOne({ key: publicKey });
