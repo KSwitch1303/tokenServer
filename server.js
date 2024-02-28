@@ -171,7 +171,7 @@ app.post('/create-db', async (req, res) => {
   await PublicKey.deleteOne({ key: 'dummy' });
 
   res.json({ message: 'Database created successfully!' });
-})
+});
 
 mongoose.connect(process.env.DB_URI)
     .then((result)=> {
