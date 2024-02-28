@@ -160,6 +160,19 @@ app.post('/generate-token', async (req, res) => {
   res.json({ token });
 });
 
+app.post('/create-db', async (req, res) => {
+  const { channelName } = req.body;
+  const PublicKey = mongoose.model(channelName, PublicKeySchema);
+
+  // Create a dummy document in the collection
+  const dummy = new PublicKey({ key: 'dummy' });
+  await dummy.save();
+
+  await PublicKey.deleteOne({ key: 'dummy' });
+
+  res.json({ message: 'Database created successfully!' });
+})
+
 mongoose.connect(process.env.DB_URI)
     .then((result)=> {
         app.listen(5000, () => console.log('Server started on port 5000'));
