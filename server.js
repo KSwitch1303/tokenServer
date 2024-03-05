@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 // Define a schema for the public key
 const PublicKeySchema = new mongoose.Schema({ key: String });
-const RoomSchema = new mongoose.Schema({ roomName: String, password: String });
+const RoomSchema = new mongoose.Schema({ roomName: String, password: String, creator: String });
 
 sdk.auth(process.env.sdkAUTH);
 sdk.server(process.env.sdkSRV);
@@ -200,9 +200,9 @@ app.post('/create-db', async (req, res) => {
 });
 
 app.post('/store-password', async (req, res) => {
-  const { password, channelName } = req.body;
+  const { password, channelName, creator } = req.body;
   const Room = mongoose.model('rooms', RoomSchema);
-  const room = new Room({ roomName: channelName, password: password });
+  const room = new Room({ roomName: channelName, password, creator});
   await room.save();
 
   res.json({ message: 'Room stored successfully!' });
