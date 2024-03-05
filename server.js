@@ -16,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 // Define a schema for the public key
 const PublicKeySchema = new mongoose.Schema({ key: String });
+const RoomSchema = new mongoose.Schema({ roomName: String, password: String });
 
 sdk.auth(process.env.sdkAUTH);
 sdk.server(process.env.sdkSRV);
@@ -55,14 +56,14 @@ app.post('/store-key', async (req, res) => {
   const { publicKey, channelName } = req.body;
 
   // Create a model from the schema with the channel name
-  const PublicKey = mongoose.model(`${channelName.toLowerCase()}s`, PublicKeySchema);
+  const PublicKey = mongoose.model(`${channelName.toLowerCase()}rsvps`, PublicKeySchema);
 
   // Check if a document with the given public key already exists
   const existingKey = await PublicKey.findOne({ key: publicKey });
 
   if (existingKey) {
     // If the public key already exists, send a response back to the client
-    res.send({ message: 'Public key already exists!' });
+    res.send({ message: 'Public key already exists!',status:400 });
     console.log('Public key already exists!');
   } else {
     // If the public key doesn't exist, create a new document
@@ -73,6 +74,31 @@ app.post('/store-key', async (req, res) => {
 
     // Send a response back to the client
     res.send({ message: 'Public key stored successfully!' });
+    console.log('Public key stored successfully!');
+  }
+});
+app.post('/nft-apply', async (req, res) => {
+  const { publicKey, channelName } = req.body;
+
+  // Create a model from the schema with the channel name
+  const PublicKey = mongoose.model(`${channelName.toLowerCase()}s`, PublicKeySchema);
+
+  // Check if a document with the given public key already exists
+  const existingKey = await PublicKey.findOne({ key: publicKey });
+
+  if (existingKey) {
+    // If the public key already exists, send a response back to the client
+    res.send({ message: 'Public key already exists!',status:400 });
+    console.log('Public key already exists!');
+  } else {
+    // If the public key doesn't exist, create a new document
+    const key = new PublicKey({ key: publicKey });
+
+    // Save the new document to the database
+    await key.save();
+
+    // Send a response back to the client
+    res.send({ message: 'Public key stored successfully!', status: 200 });
     console.log('Public key stored successfully!');
   }
 });
@@ -172,6 +198,39 @@ app.post('/create-db', async (req, res) => {
 
   res.json({ message: 'Database created successfully!' });
 });
+
+app.post('/store-password', async (req, res) => {
+  const { password, channelName } = req.body;
+  const Room = mongoose.model('rooms', RoomSchema);
+  const room = new Room({ roomName: channelName, password: password });
+  await room.save();
+
+  res.json({ message: 'Room stored successfully!' });
+})
+
+app.post('/check-password', async (req, res) => {
+  const { password, channelName } = req.body;
+  const Room = mongoose.model('rooms', RoomSchema);
+  console.log(password, channelName);
+  const room = await Room.findOne({ roomName: channelName, password: password });
+  if (room) {
+    res.json({ status: 200 });
+  } else {
+    res.json({ status: 400 });
+  }
+})
+
+app.post('/checkRSVP', async (req, res) => {
+  // console.log('sui');
+  const { publicKey, channelName } = req.body;
+  const PublicKey = mongoose.model(`${channelName.toLowerCase()}rsvps`, PublicKeySchema);
+  const key = await PublicKey.findOne({ key: publicKey });
+  if (key) {
+    res.json({ status: 200 });
+  } else {
+    res.json({ status: 400 });
+  }
+})
 
 mongoose.connect(process.env.DB_URI)
     .then((result)=> {
