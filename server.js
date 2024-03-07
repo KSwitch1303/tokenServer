@@ -232,6 +232,42 @@ app.post('/checkRSVP', async (req, res) => {
   }
 })
 
+app.post('/ownercheck', async (req, res) => {
+  const { creator, channelName } = req.body;
+  const Room = mongoose.model('rooms', RoomSchema);
+  const room = await Room.findOne({ roomName: channelName.toLowerCase(), creator: creator });
+  if (room) {
+    res.json({ status: 200 });
+  } else {
+    res.json({ status: 400 });
+  }
+})
+
+app.post('/countParticipants', async (req, res) => {
+  const { channelName } = req.body;
+  const Publickey = mongoose.model(`${channelName.toLowerCase()}s`, PublicKeySchema);
+  const count = await Publickey.countDocuments();
+  res.json({ count });
+})
+
+app.post('/countRSVPs', async (req, res) => {
+  const { channelName } = req.body;
+  const Publickey = mongoose.model(`${channelName.toLowerCase()}rsvps`, PublicKeySchema);
+  const count = await Publickey.countDocuments();
+  res.json({ count });
+})
+
+app.post('/delete', async (req, res) => {
+  const { channelName } = req.body;
+  const Room = mongoose.model('rooms', RoomSchema);
+  await Room.deleteOne({ roomName: channelName });
+  const PublicKey = mongoose.model(`${channelName.toLowerCase()}s`, PublicKeySchema);
+  await PublicKey.collection.drop();
+  const PublickeyRSVP = mongoose.model(`${channelName.toLowerCase()}rsvps`, PublicKeySchema);
+  await PublickeyRSVP.collection.drop();
+  res.json({ message: 'Database deleted successfully!' });
+})
+
 mongoose.connect(process.env.DB_URI)
     .then((result)=> {
         app.listen(5000, () => console.log('Server started on port 5000'));
