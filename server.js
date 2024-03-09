@@ -17,6 +17,8 @@ app.use(express.json());
 // Define a schema for the public key
 const PublicKeySchema = new mongoose.Schema({ key: String });
 const RoomSchema = new mongoose.Schema({ roomName: String, password: String, creator: String });
+const ProfileSchema = new mongoose.Schema({ username: String, imageurl: String, key: String });
+const RoomLinkSchema = new mongoose.Schema({ roomName: String, RSVPlink: String, roomLink: String, owner: String });
 
 sdk.auth(process.env.sdkAUTH);
 sdk.server(process.env.sdkSRV);
@@ -268,9 +270,74 @@ app.post('/delete', async (req, res) => {
   res.json({ message: 'Database deleted successfully!' });
 })
 
+app.post('/create-profile', async (req, res) => {
+  const { username, imageurl, key } = req.body;
+  const Profile = mongoose.model('profiles', ProfileSchema);
+  const profile = new Profile({ username, imageurl, key });
+  await profile.save();
+  res.json({ status: 200 });
+})
+
+app.get('/check-profile', async (req, res) => {
+  const { key } = req.query;
+  const Profile = mongoose.model('profiles', ProfileSchema);
+  const profile = await Profile.findOne({ key });
+  if (profile) {
+    res.json({ status: 200 });
+  } else {
+    res.json({ status: 400 });
+  }
+})
+
+app.get('/get-profile', async (req, res) => {
+  const { key } = req.query;
+  const Profile = mongoose.model('profiles', ProfileSchema);
+  const profile = await Profile.findOne({ key });
+  res.json({ profile });
+})
+
+app.post('/store-links', async (req, res) => {
+  const { owner, roomName, RSVPlink, roomLink } = req.body;
+  const RoomLink = mongoose.model('roomlinks', RoomLinkSchema);
+  const link = new RoomLink({ owner, roomName, RSVPlink, roomLink });
+  await link.save();
+  res.json({ status: 200 });
+})
+
+app.get('/get-links', async (req, res) => {
+  const { roomName } = req.query;
+  const RoomLink = mongoose.model('roomlinks', RoomLinkSchema);
+  const link = await RoomLink.findOne({ roomName });
+  if (link) {
+    res.json({ link, status: 200 });
+  } else {
+    res.json({ status: 400 });
+  }
+})
+
+app.get('/get-rooms', async (req, res) => {
+  const { creator } = req.query;
+  const Room = mongoose.model('rooms', RoomSchema);
+  const rooms = await Room.find({creator});
+  res.json({ rooms });
+})
+
+app.get('/get-rsvps', async (req, res) => {
+  const { roomName } = req.query;
+  const PublicKey = mongoose.model(`${roomName.toLowerCase()}rsvps`, PublicKeySchema);
+  const rsvps = await PublicKey.find({});
+  res.json({ rsvps });
+})
+
+app.get('/get-participants', async (req, res) => {
+  const { roomName } = req.query;
+  const PublicKey = mongoose.model(`${roomName.toLowerCase()}s`, PublicKeySchema);
+  const participants = await PublicKey.find({});
+  res.json({ participants });
+})
+
 mongoose.connect(process.env.DB_URI)
     .then((result)=> {
         app.listen(5000, () => console.log('Server started on port 5000'));
     })
     .catch((err) => console.log(err))
-
