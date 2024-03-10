@@ -336,6 +336,28 @@ app.get('/get-participants', async (req, res) => {
   res.json({ participants });
 })
 
+app.get('/get-image-url', async (req, res) => {
+  const { key } = req.query;
+  const Profile = mongoose.model('profiles', ProfileSchema);
+  const profile = await Profile.findOne({ key });
+  if (!profile) {
+    res.json({ status: 400 });
+    return
+  }
+  res.json({ img: profile.imageurl, status: 200 });
+})
+
+app.get('/check-roomLink', async (req, res) => {
+  const { roomLink } = req.query;
+  const RoomLink = mongoose.model('roomlinks', RoomLinkSchema);
+  const link = await RoomLink.findOne({ roomLink });
+  if (link) {
+    res.json({ status: 200 });
+  } else {
+    res.json({ status: 400 });
+  }
+})
+
 mongoose.connect(process.env.DB_URI)
     .then((result)=> {
         app.listen(5000, () => console.log('Server started on port 5000'));
