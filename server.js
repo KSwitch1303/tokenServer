@@ -267,6 +267,8 @@ app.post('/delete', async (req, res) => {
   await PublicKey.collection.drop();
   const PublickeyRSVP = mongoose.model(`${channelName.toLowerCase()}rsvps`, PublicKeySchema);
   await PublickeyRSVP.collection.drop();
+  const RoomLink = mongoose.model('roomlinks', RoomLinkSchema);
+  await RoomLink.deleteOne({ roomName: channelName });
   res.json({ message: 'Database deleted successfully!' });
 })
 
