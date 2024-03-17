@@ -45,7 +45,7 @@ app.post('/mint', async (req, res) => {
           description,
           image,
         },
-        { projectId: 2 },
+        { projectId: 3 },
       )
       .then(({ data }) => console.log(data))
       .catch((err) => console.error(err));
