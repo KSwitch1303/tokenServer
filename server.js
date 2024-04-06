@@ -17,7 +17,7 @@ app.use(express.json());
 // Define a schema for the public key
 const PublicKeySchema = new mongoose.Schema({ key: String });
 const RoomSchema = new mongoose.Schema({ roomName: String, password: String, creator: String });
-const ProfileSchema = new mongoose.Schema({ username: String, imageurl: String, key: String });
+const ProfileSchema = new mongoose.Schema({ username: String, email: String, imageurl: String, key: String });
 const RoomLinkSchema = new mongoose.Schema({ roomName: String, RSVPlink: String, roomLink: String, owner: String });
 
 sdk.auth(process.env.sdkAUTH);
@@ -109,7 +109,6 @@ app.post('/nft-apply', async (req, res) => {
 //delete endpoints
 app.delete('/delete-key', async (req, res) => {
     const { publicKey, channelName } = req.body;
-    
   
     // Get the model for the channel
     const PublicKey = mongoose.model(channelName, PublicKeySchema);
@@ -273,9 +272,12 @@ app.post('/delete', async (req, res) => {
 })
 
 app.post('/create-profile', async (req, res) => {
-  const { username, imageurl, key } = req.body;
+  let { username, email, imageurl, key } = req.body;
+  if (!imageurl) {
+    imageurl = 'https://i.imgur.com/gJnwif2.jpeg';
+  }
   const Profile = mongoose.model('profiles', ProfileSchema);
-  const profile = new Profile({ username, imageurl, key });
+  const profile = new Profile({ username, email, imageurl, key });
   await profile.save();
   res.json({ status: 200 });
 })
@@ -358,6 +360,34 @@ app.get('/check-roomLink', async (req, res) => {
   } else {
     res.json({ status: 400 });
   }
+})
+
+app.get('/check-publickey' , async (req, res) => {
+  const { key } = req.query;
+  const Profile = mongoose.model('profiles', ProfileSchema);
+  const profile = await Profile.findOne({ key });
+  if (profile) {
+    res.json({ status: 200 });
+  } else {
+    res.json({ status: 400 });
+  }
+})
+
+app.post('/update-profile', async (req, res) => {
+  const { username, email, imageurl, key } = req.body;
+  const Profile = mongoose.model('profiles', ProfileSchema);
+  const profile = await Profile.findOne({ key });
+  if (username) {
+    profile.username = username;
+  }
+  if (email) {
+    profile.email = email;
+  }
+  if (imageurl) {
+    profile.imageurl = imageurl;
+  }
+  await profile.save();
+  res.json({ status: 200 });
 })
 
 mongoose.connect(process.env.DB_URI)
